@@ -35,8 +35,9 @@ learning_rate = 0.01
 num_iterations = 1000
 theta, cost_history = gradient_descend(x_b, y, theta, learning_rate, num_iterations)
 
-plt.plot(range(num_iterations), cost_history)
-plt.xlabel('Number of Iterations')
-plt.ylabel('Cost')
-plt.title('Cost Function History')
+plt.scatter(x,y,alpha=0.5)
+plt.plot(x,predict(x_b,theta),color='red')
+plt.xlabel('x values')
+plt.ylabel('y values')
+plt.title('Linear regression model implemented from scratch')
 plt.show()
