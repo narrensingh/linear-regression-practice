@@ -6,41 +6,42 @@ from normalisation import normalization
 np.random.seed(42)
 x = np.random.rand(100,1)*2
 y = 4 + 3*x + np.random.rand(100,1)
+x_b = np.c_[np.ones((x.shape[0],1)),x]
 
-def predict(x,param):
-    return x.dot(param)
+def predict(x_b,params):
+    return x_b.dot(params)
 
-def cost_function(x,y,param):
-    predictions = predict(x,param)
-    cost = (((y - predictions)**2).mean())/2
+def cost(error):
+    cost = (np.mean(error**2))/2
     return cost
 
-def gradient_descend(x,y,param,learning_rate,num_interations):
-    m = y.shape[0]
-    cost_history = np.zeros(num_interations)
-    for i in range(num_interations):
-        predictions = predict(x,param)
-        error = predictions - y
-        gradient_weight = ((x.T.dot(error)).sum())/m
-        gradient_bias = error.mean()
-        param[1] -= learning_rate*gradient_weight
-        param[0] -= learning_rate*gradient_bias
-        cost_history[i] = cost_function(x,y,param)
-    return param,cost_history
+def gradient_descend(x_b,y,n_iterations=1000,learning_rate=0.01):
+    params = np.zeros((2,1))
+    cost_history = np.zeros(n_iterations)
+    for i in range(n_iterations):
+        predictions = predict(x_b,params)
+        error = predictions - y 
+        params[0] -= learning_rate*np.mean(error)
+        params[1] -= learning_rate*np.dot(error.T,x_b[:,1])
+        e = cost(error)
+        cost_history[i] = e
+        if i%100 == 0:
+            print(f'The Cost In {i}th iteration is: {e}')
+    return params,cost_history
 
-ones = np.ones((100,1))
-x_b = np.column_stack((ones,x))
-theta = np.random.rand(2,1)
-learning_rate = 0.01
-num_iterations = 1000
-theta, cost_history = gradient_descend(x_b, y, theta, learning_rate, num_iterations)
+def predictions(x_b,params):
+    predictions = x_b.dot(params)
+    return predictions
 
+params,cost_history = gradient_descend(x_b,y,n_iterations=1000,learning_rate=0.01)
+model = predictions(x_b,params).reshape(100)
 plt.subplot(2,1,1)
-plt.scatter(x,y,alpha=0.5)
-plt.plot(x,predict(x_b,theta),color='red')
-plt.title('Comparison')
-plt.subplot(2,1,2)
 plt.plot(cost_history)
-plt.title('Cost function')
-plt.suptitle('Linear regression model implemented from scratch')
+plt.xlabel('# iterations')
+plt.ylabel('Cost')
+plt.title('Learning Curve')
+plt.subplot(2,1,2)
+plt.scatter(x,y,alpha=0.5)
+plt.plot(x,model,color='red')
+plt.title('Model')
 plt.show()
